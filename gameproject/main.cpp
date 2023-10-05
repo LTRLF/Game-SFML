@@ -6,7 +6,7 @@ int main()
 {
     sf::RenderWindow window(sf::VideoMode(800, 600), "SFML Game",sf::Style::Close | sf::Style::Resize);
     sf::Texture playerTexture;
-    playerTexture.loadFromFile("Knight_idle.png");
+    playerTexture.loadFromFile("Knight.png");
 
     Player player(&playerTexture, sf::Vector2u(4, 2), 0.3f, 100.0f);
 
