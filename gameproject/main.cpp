@@ -1,10 +1,13 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include "Player.h"
+#include "NewMenu.h"
 
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(800, 600), "SFML Game",sf::Style::Close | sf::Style::Resize);
+    NewMenu menu(window.getSize().x, window.getSize().y);
+
     sf::Texture playerTexture;
     playerTexture.loadFromFile("Knight.png");
 
@@ -55,6 +58,7 @@ int main()
         player.Update(deltaTime);
 
         window.clear(sf::Color(150, 150, 150));
+        menu.draw(window);
         player.Draw(window);
         window.display();
     }
