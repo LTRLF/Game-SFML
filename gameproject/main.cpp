@@ -2,6 +2,9 @@
 #include <iostream>
 #include "Player.h"
 #include "NewMenu.h"
+#include "Enemy.h"
+#include <random>
+#include <vector>
 
 enum GameState
 {
@@ -10,16 +13,29 @@ enum GameState
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(800, 600), "SFML Game",sf::Style::Close | sf::Style::Resize);
+    sf::RenderWindow window(sf::VideoMode(550, 800), "SFML Game",sf::Style::Close | sf::Style::Resize);
     NewMenu menu(window.getSize().x, window.getSize().y);
 
     sf::Texture playerTexture;
     playerTexture.loadFromFile("Knight.png");
 
+    sf::Texture enemyTexture;
+    enemyTexture.loadFromFile("Assets/Assets/Blue wizard/BlueWizard.png");
+
     Player player(&playerTexture, sf::Vector2u(4, 2), 0.3f, 100.0f);
+
+    std::vector<Enemy> enemies;
 
     float deltaTime = 0.0f;
     sf::Clock clock;
+
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    //temporary
+    float spawnEnemyX = (rand() % 460);
+    sf::Vector2f position(spawnEnemyX, 0.0f);
+    Enemy enemy(&enemyTexture, sf::Vector2u(2, 1), 0.3f, 100.0f, position);
 
     GameState state = MENU;
     while (window.isOpen())
@@ -92,7 +108,7 @@ int main()
                 player.setPosition((float)mousePos.x, (float)mousePos.y);
             }*/
 
-            window.clear();
+            window.clear(sf::Color(67, 165, 220));
             menu.draw(window);
             window.display();
         }
@@ -108,9 +124,13 @@ int main()
                     break;
                 }
             }
+            
+
             player.Update(deltaTime);
+            enemy.Update(deltaTime);
             window.clear(sf::Color(150, 150, 150));
             player.Draw(window);
+            enemy.Draw(window);
             window.display();
 
         }

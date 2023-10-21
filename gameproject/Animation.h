@@ -17,6 +17,7 @@ private:
 
 	float totalTime;
 	float switchTime;
-
+	int imageStart;
+	int imageEnd;
 };
 

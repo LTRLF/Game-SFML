@@ -18,6 +18,8 @@ Animation::~Animation()
 
 void Animation::Update(int row, float deltatime, bool faceRight)
 {
+	this->imageStart = imageStart;
+	this->imageEnd = imageEnd;
 	currentImage.y = row;
 	totalTime += deltatime;
 
