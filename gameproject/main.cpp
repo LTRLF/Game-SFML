@@ -5,16 +5,18 @@
 #include "Enemy.h"
 #include <random>
 #include <vector>
+#include "PauseMenu.h"
 
 enum GameState
 {
-    MENU, GAME
+    MENU, GAME, PAUSE, END
 };
 
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(550, 800), "SFML Game",sf::Style::Close | sf::Style::Resize);
-    NewMenu menu(window.getSize().x, window.getSize().y);
+    NewMenu   menu(window.getSize().x, window.getSize().y);
+    PauseMenu pause(window.getSize().x / 4.f, window.getSize().y / 2.f);
 
     sf::Texture playerTexture;
     playerTexture.loadFromFile("Knight.png");
@@ -35,7 +37,7 @@ int main()
     //temporary
     float spawnEnemyX = (rand() % 460);
     sf::Vector2f position(spawnEnemyX, 0.0f);
-    Enemy enemy(&enemyTexture, sf::Vector2u(2, 1), 0.3f, 100.0f, position);
+    Enemy enemy(&enemyTexture, sf::Vector2u(2, 1), 0.5f, 50.0f, position);
 
     GameState state = MENU;
     while (window.isOpen())
@@ -119,12 +121,32 @@ int main()
             {
                 switch (evnt.type)
                 {
-                case sf::Event::Closed:
+                case sf::Event::KeyReleased:
+                    switch (evnt.key.code)
+                    {
+                    case sf::Keyboard::Escape:
+                        //switch (menu.GetPressedItem())***************************************
+                        {
+                        
+                            std::cout << "Pause" << std::endl;
+                            state = PAUSE;
+                            break;
+                        /*case 1:
+                            std::cout << "Option button" << std::endl;
+                            break;
+                        case 2:
+                            window.close();
+                            break;*/
+                        }
+                    }
+
+                    /*break;*/
+
+                /*case sf::Event::Closed:
                     window.close();
-                    break;
+                    break;*/
                 }
-            }
-            
+            }          
 
             player.Update(deltaTime);
             enemy.Update(deltaTime);
@@ -133,6 +155,49 @@ int main()
             enemy.Draw(window);
             window.display();
 
+        }
+
+        if (state == PAUSE)
+        {
+            while (window.pollEvent(evnt))
+            {
+                switch (evnt.type)
+                {
+                case sf::Event::KeyReleased:
+                    switch (evnt.key.code)
+                    {
+                    case sf::Keyboard::Up:
+                        menu.MoveUp();
+                        break;
+
+                    case sf::Keyboard::Down:
+                        menu.MoveDown();
+                        break;
+
+                    case sf::Keyboard::Return:
+                        switch (menu.GetPressedItem())
+                        {
+                        case 0:
+                            std::cout << "Resume" << std::endl;
+                            state = GAME;
+                            break;
+                        case 1:
+                            state = MENU;
+                            break;
+                        }
+                    }
+
+                    break;
+
+                case sf::Event::Closed:
+                    window.close();
+                    break;
+                }
+
+                window.clear(sf::Color(67, 165, 220, 50));
+                pause.draw(window);
+                window.display();
+            }
         }
     }
         
