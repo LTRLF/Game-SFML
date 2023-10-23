@@ -16,5 +16,7 @@ private:
 	int selectedItemIndex;
 	sf::Font font;
 	sf::Text pause[MAX_NUMBER_OF_ITEMS];
+	sf::RectangleShape background;
+	sf::Text text;
 
 };

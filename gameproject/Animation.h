@@ -11,6 +11,7 @@ public:
 
 public:
 	sf::IntRect uvRect;
+
 private:
 	sf::Vector2u imageCount;
 	sf::Vector2u currentImage;
