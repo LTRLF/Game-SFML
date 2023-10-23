@@ -8,6 +8,7 @@
 #include "PauseMenu.h"
 #include "Logic.h"
 #include "main.h"
+using namespace sf;
 
 enum GameState
 {
@@ -53,10 +54,20 @@ int main()
     {
         //handle error
     }
+    //arrow graphics
     sf::Texture upTexture;
     upTexture.loadFromFile("Assets/Assets/Buttons/Pixel Up Buttons.png");
-    sf::RectangleShape up(sf::Vector2f(64, 64));
-    up.setTexture(&upTexture);
+    sf::Texture downTexture;
+    downTexture.loadFromFile("Assets/Assets/Buttons/Pixel Down Buttons.png");
+    sf::Texture leftTexture;
+    leftTexture.loadFromFile("Assets/Assets/Buttons/Pixel Left Buttons.png");
+    sf::Texture rightTexture;
+    rightTexture.loadFromFile("Assets/Assets/Buttons/Pixel Right Buttons.png");
+
+    sf::RectangleShape shape;
+    shape.setSize(Vector2f(64, 64));
+    shape.setTexture(&upTexture);
+    shape.setPosition(260.0f, 330.0f);
 
     Player player(&playerTexture, sf::Vector2u(4, 2), 0.3f, 100.0f);
 
@@ -141,7 +152,7 @@ int main()
 
             sf::Keyboard::Key randomKey = static_cast<sf::Keyboard::Key>(sf::Keyboard::Left + rand() % 4);
             std::string keyString = KeyToString(randomKey);
-            keyText.setString ("Press: " + keyString);
+            keyText.setString ("Press: ");
 
             while (window.isOpen()) {
                 sf::Event evnt;
@@ -158,7 +169,7 @@ int main()
                             std::cout << "Correct Key Pressed!" << std::endl;
                             randomKey = static_cast<sf::Keyboard::Key>(sf::Keyboard::Left + rand() % 4);
                             keyString = KeyToString(randomKey);
-                            keyText.setString("Press: " + keyString);
+                            keyText.setString("Press: ");
                         }
                         else {
                             std::cout << "Wrong Key Pressed!" << std::endl;
@@ -197,8 +208,21 @@ int main()
                         state = END;
                     }*/
 
+                    
 
+                }
 
+                if (randomKey == sf::Keyboard::Up) {
+                    shape.setTexture(&upTexture);
+                }
+                else if (randomKey == sf::Keyboard::Down) {
+                    shape.setTexture(&downTexture);
+                }
+                else if (randomKey == sf::Keyboard::Left) {
+                    shape.setTexture(&leftTexture);
+                }
+                else if (randomKey == sf::Keyboard::Right) {
+                    shape.setTexture(&rightTexture);
                 }
 
                 player.Update(deltaTime);
@@ -207,6 +231,7 @@ int main()
                 player.Draw(window);
                 enemy.Draw(window);
                 window.draw(keyText);
+                window.draw(shape);
                 window.display();
 
             }
