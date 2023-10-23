@@ -6,23 +6,57 @@
 #include <random>
 #include <vector>
 #include "PauseMenu.h"
+#include "Logic.h"
+#include "main.h"
 
 enum GameState
 {
     MENU, GAME, PAUSE, END
 };
 
+std::string KeyToString(sf::Keyboard::Key key) {
+    switch (key) {
+    case sf::Keyboard::Up:
+        return "Up Arrow";
+    case sf::Keyboard::Left:
+        return "Left Arrow";
+    case sf::Keyboard::Down:
+        return "Down Arrow";
+    case sf::Keyboard::Right:
+        return "Right Arrow";
+    default:
+        return "Unknown";
+    }
+}
+
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(550, 800), "SFML Game",sf::Style::Close | sf::Style::Resize);
+    srand(static_cast<unsigned>(time(0)));
+
+    sf::RenderWindow window(sf::VideoMode(550, 800), "SFML Game",sf::Style::Close);
     NewMenu   menu(window.getSize().x, window.getSize().y);
     PauseMenu pause(window.getSize().x / 4.f, window.getSize().y / 2.f);
+
+    sf::Texture backgroundTexture;
+    backgroundTexture.loadFromFile("Assets/Assets/background.png");
+    sf::RectangleShape background(sf::Vector2f(550, 800));
+    background.setTexture(&backgroundTexture);
 
     sf::Texture playerTexture;
     playerTexture.loadFromFile("Knight.png");
 
     sf::Texture enemyTexture;
     enemyTexture.loadFromFile("Assets/Assets/Blue wizard/BlueWizard.png");
+
+    sf::Font font;
+    if (!font.loadFromFile("Next Bro.ttf"))
+    {
+        //handle error
+    }
+    sf::Texture upTexture;
+    upTexture.loadFromFile("Assets/Assets/Buttons/Pixel Up Buttons.png");
+    sf::RectangleShape up(sf::Vector2f(64, 64));
+    up.setTexture(&upTexture);
 
     Player player(&playerTexture, sf::Vector2u(4, 2), 0.3f, 100.0f);
 
@@ -36,7 +70,7 @@ int main()
 
     //temporary
     float spawnEnemyX = (rand() % 460);
-    sf::Vector2f position(spawnEnemyX, 0.0f);
+    sf::Vector2f position(spawnEnemyX, -1.0f);
     Enemy enemy(&enemyTexture, sf::Vector2u(2, 1), 0.5f, 50.0f, position);
 
     GameState state = MENU;
@@ -84,25 +118,7 @@ int main()
                     window.close();
                     break;
                 }
-
-
             }
-            /*if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
-            {
-                player.move(-0.1f, 0.0f);
-            }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
-            {
-                player.move(0.1f, 0.0f);
-            }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
-            {
-                player.move(0.0f, -0.1f);
-            }
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
-            {
-                player.move(0.0f, 0.1f);
-            }*/
 
             /*if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
             {
@@ -117,48 +133,88 @@ int main()
 
         if (state == GAME)
         {
-            while (window.pollEvent(evnt))
-            {
-                switch (evnt.type)
+            sf::Text keyText;
+            keyText.setFont(font);
+            keyText.setCharacterSize(24);
+            keyText.setFillColor(sf::Color::White);
+            keyText.setPosition(190.0f, 330.0f);
+
+            sf::Keyboard::Key randomKey = static_cast<sf::Keyboard::Key>(sf::Keyboard::Left + rand() % 4);
+            std::string keyString = KeyToString(randomKey);
+            keyText.setString ("Press: " + keyString);
+
+            while (window.isOpen()) {
+                sf::Event evnt;
+                while (window.pollEvent(evnt))
                 {
-                case sf::Event::KeyReleased:
-                    switch (evnt.key.code)
-                    {
-                    case sf::Keyboard::Escape:
-                        //switch (menu.GetPressedItem())***************************************
-                        {
-                        
-                            std::cout << "Pause" << std::endl;
-                            state = PAUSE;
-                            break;
-                        /*case 1:
-                            std::cout << "Option button" << std::endl;
-                            break;
-                        case 2:
-                            window.close();
-                            break;*/
+                    if (evnt.type == sf::Event::Closed) {
+                        window.close();
+                    }
+
+                    /*if (Logic.life() >= 0)
+                    {*/
+                    if (evnt.type == sf::Event::KeyPressed) {
+                        if (evnt.key.code == randomKey) {
+                            std::cout << "Correct Key Pressed!" << std::endl;
+                            randomKey = static_cast<sf::Keyboard::Key>(sf::Keyboard::Left + rand() % 4);
+                            keyString = KeyToString(randomKey);
+                            keyText.setString("Press: " + keyString);
+                        }
+                        else {
+                            std::cout << "Wrong Key Pressed!" << std::endl;
                         }
                     }
 
-                    /*break;*/
+                    switch (evnt.type)
+                    {
+                    case sf::Event::KeyReleased:
+                        switch (evnt.key.code)
+                        {
+                            case sf::Keyboard::Escape:
+                            {
+                                std::cout << "Pause" << std::endl;
+                                state = PAUSE;
+                                break;
+                                /*case 1:
+                                    std::cout << "Option button" << std::endl;
+                                    break;
+                                case 2:
+                                    window.close();
+                                    break;*/
+                            }
+                        }
 
-                /*case sf::Event::Closed:
-                    window.close();
-                    break;*/
+                        /*break;*/
+
+                    /*case sf::Event::Closed:
+                        window.close();
+                        break;*/
+                    }
+                    //}
+
+                    /*else
+                    {
+                        state = END;
+                    }*/
+
+
+
                 }
-            }          
 
-            player.Update(deltaTime);
-            enemy.Update(deltaTime);
-            window.clear(sf::Color(150, 150, 150));
-            player.Draw(window);
-            enemy.Draw(window);
-            window.display();
+                player.Update(deltaTime);
+                enemy.Update(deltaTime);
+                window.draw(background);
+                player.Draw(window);
+                enemy.Draw(window);
+                window.draw(keyText);
+                window.display();
 
+            }
         }
 
         if (state == PAUSE)
         {
+            //window.clear();
             while (window.pollEvent(evnt))
             {
                 switch (evnt.type)
@@ -167,15 +223,15 @@ int main()
                     switch (evnt.key.code)
                     {
                     case sf::Keyboard::Up:
-                        menu.MoveUp();
+                        pause.MoveUp();
                         break;
 
                     case sf::Keyboard::Down:
-                        menu.MoveDown();
+                        pause.MoveDown();
                         break;
 
                     case sf::Keyboard::Return:
-                        switch (menu.GetPressedItem())
+                        switch (pause.GetPressedItem())
                         {
                         case 0:
                             std::cout << "Resume" << std::endl;
@@ -194,7 +250,9 @@ int main()
                     break;
                 }
 
-                window.clear(sf::Color(67, 165, 220, 50));
+                //window.clear(/*sf::Color(100, 150, 150, 50)*/);
+                player.Draw(window);
+                enemy.Draw(window);
                 pause.draw(window);
                 window.display();
             }
