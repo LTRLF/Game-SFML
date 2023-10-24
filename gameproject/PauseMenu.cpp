@@ -4,7 +4,7 @@
 PauseMenu::PauseMenu(float width, float height)
 {
 	background.setSize(sf::Vector2f	(350.0f, 300.0f));
-	background.setFillColor(sf::Color(150, 150, 150, 70));
+	background.setFillColor(sf::Color(150, 150, 150, 200));
 	background.setPosition(110.0f, 215.0f);
 
 	if (!font.loadFromFile("Next Bro.ttf"))

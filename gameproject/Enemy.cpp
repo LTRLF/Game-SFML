@@ -36,3 +36,8 @@ void Enemy::Draw(sf::RenderWindow& window)
 {
 	window.draw(body);
 }
+
+sf::RectangleShape& Enemy::getBody()
+{
+	return body;
+}

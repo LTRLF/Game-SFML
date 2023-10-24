@@ -45,3 +45,10 @@ void Player::Draw(sf::RenderWindow& window)
 {
 	window.draw(body);
 }
+
+sf::RectangleShape& Player::getBody()
+{
+	return body;
+}
+
+
