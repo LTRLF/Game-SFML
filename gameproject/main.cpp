@@ -12,30 +12,6 @@
 using namespace sf;
 using namespace std;
 
-//class Scoreboard {
-//private:
-//    Font font1;
-//    Font font2;
-//    Texture TEXTBOX;
-//    Text txt;
-//    std::vector<Text> pause;
-//    RectangleShape textbox, inputbox, exitbox;
-//    std::vector<std::pair<Text, Text>> scoreUser;
-//    std::vector<RectangleShape> textboxs;
-//public:
-//    Menu(float width, float height);
-//    void draw(RenderWindow& window, int windowState);
-//    void ExitBox(RenderWindow& window);
-//    void MoveUp(int windowState);
-//    void MoveDown(int windowState);
-//    void CreateScoreboard();
-//    std::vector<Text> text[MAX_STATE];
-//    std::vector<RectangleShape> resumebox;
-//    std::set<std::pair<int, std::string>, std::greater<std::pair<int, std::string>>> rank;
-//    Sound sound[6];
-//    int selectedItemIndex = 0;
-//};
-
 enum GameState
 {
     MENU, GAME, PAUSE, END, READY
@@ -60,7 +36,7 @@ int main()
 {
     srand(static_cast<unsigned>(time(0)));
 
-    sf::RenderWindow window(sf::VideoMode(550, 800), "Press[!] No Wait",sf::Style::Close);
+    sf::RenderWindow window(sf::VideoMode(550, 800), "Press[!] No Wait", sf::Style::Close);
     NewMenu   menu(window.getSize().x, window.getSize().y);
     PauseMenu pause(window.getSize().x / 4.f, window.getSize().y / 2.f);
 
@@ -122,7 +98,7 @@ int main()
 
     GameState state = MENU;
     while (window.isOpen())
-    { 
+    {
         deltaTime = clock.restart().asSeconds();
 
         sf::Event evnt;
@@ -184,9 +160,9 @@ int main()
             {
                 switch (evnt.type)
                 {
-                    case sf::Event::Closed:
-                        window.close();
-                        break;
+                case sf::Event::Closed:
+                    window.close();
+                    break;
 
                     if (evnt.type == sf::Event::TextEntered) {
                         if (evnt.text.unicode == sf::Keyboard::BackSpace) {
@@ -203,7 +179,7 @@ int main()
             window.display();
         }
 
-        if (state == GAME|| state == PAUSE)
+        if (state == GAME || state == PAUSE)
         {
             sf::Text keyText;
             keyText.setFont(font);
@@ -213,7 +189,7 @@ int main()
 
             sf::Keyboard::Key randomKey = static_cast<sf::Keyboard::Key>(sf::Keyboard::Left + rand() % 4);
             std::string keyString = KeyToString(randomKey);
-            keyText.setString ("Press: ");
+            keyText.setString("Press: ");
 
             //score
             Font font;
@@ -235,8 +211,8 @@ int main()
             //enemyhp
             int enemyhp = 3;
 
-            while (state == GAME|| state == PAUSE)
-                {
+            while (state == GAME || state == PAUSE)
+            {
                 sf::Event evnt;
                 while (window.pollEvent(evnt))
                 {
@@ -244,7 +220,7 @@ int main()
                         window.close();
                     }
 
-                    if (evnt.type == sf::Event::KeyPressed&& evnt.key.code >=71&& evnt.key.code <= 74 && state == GAME){
+                    if (evnt.type == sf::Event::KeyPressed && evnt.key.code >= 71 && evnt.key.code <= 74 && state == GAME) {
                         if (evnt.key.code == randomKey) {
                             curscore += 5;
                             enemyhp -= 1;
@@ -266,18 +242,18 @@ int main()
                     case sf::Event::KeyReleased:
                         switch (evnt.key.code)
                         {
-                            case sf::Keyboard::Escape:
-                            {
-                                std::cout << "Pause" << std::endl;
-                                state = PAUSE;
+                        case sf::Keyboard::Escape:
+                        {
+                            std::cout << "Pause" << std::endl;
+                            state = PAUSE;
+                            break;
+                            /*case 1:
+                                std::cout << "Option button" << std::endl;
                                 break;
-                                /*case 1:
-                                    std::cout << "Option button" << std::endl;
-                                    break;
-                                case 2:
-                                    window.close();
-                                    break;*/
-                            }
+                            case 2:
+                                window.close();
+                                break;*/
+                        }
                         }
 
                         /*break;*/
@@ -293,7 +269,7 @@ int main()
                         state = END;
                     }*/
 
-                    
+
 
                 }
 
@@ -321,7 +297,7 @@ int main()
                     enemyhp = 3;
                 }
 
-                if(enemyhp == 0) {
+                if (enemyhp == 0) {
                     float spawnEnemyX = (rand() % 460);
                     speed = 40;
                     sf::Vector2f position(spawnEnemyX, -100.0f);
@@ -336,41 +312,39 @@ int main()
                 if (state == PAUSE)
                 {
 
-            
-                        switch (evnt.type)
+
+                    switch (evnt.type)
+                    {
+                    case sf::Event::KeyReleased:
+                        switch (evnt.key.code)
                         {
-                        case sf::Event::KeyReleased:
-                            switch (evnt.key.code)
+                        case sf::Keyboard::Up:
+                            pause.MoveUp();
+                            continue;
+                        case sf::Keyboard::Down:
+                            pause.MoveDown();
+                            continue;
+
+                        case sf::Keyboard::Return:
+                            switch (pause.GetPressedItem())
                             {
-                            case sf::Keyboard::Up:
-                                pause.MoveUp();
-                                continue;
-                            case sf::Keyboard::Down:
-                                pause.MoveDown();
-                                continue;
-
-                            case sf::Keyboard::Return:
-                                switch (pause.GetPressedItem())
-                                {
-                                case 0:
-                                    std::cout << "Resume" << std::endl;
-                                    state = GAME;
-                                    break;
-                                case 1:
-                                    state = MENU;
-                                    break;
-                                }
+                            case 0:
+                                std::cout << "Resume" << std::endl;
+                                state = GAME;
+                                break;
+                            case 1:
+                                state = MENU;
+                                break;
                             }
-
-                            break;
-
-                        case sf::Event::Closed:
-                            window.close();
-                            break;
                         }
 
+                        break;
 
-                    //window.clear(/*sf::Color(100, 150, 150, 50)*/); 
+                    case sf::Event::Closed:
+                        window.close();
+                        break;
+                    }
+
                     window.clear();
                     window.draw(background);
                     window.draw(score);
@@ -378,8 +352,6 @@ int main()
                     window.display();
                     continue;
                 }
-
-                //if (enemy.getPosition().y == player.getPosition().y) life--;
 
                 player.Update(deltaTime);
                 enemy.Update(deltaTime);
@@ -397,7 +369,6 @@ int main()
         }
 
     }
-        
+
     return 0;
 }
-
