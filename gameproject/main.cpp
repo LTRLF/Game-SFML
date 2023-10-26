@@ -12,30 +12,6 @@
 using namespace sf;
 using namespace std;
 
-//class Scoreboard {
-//private:
-//    Font font1;
-//    Font font2;
-//    Texture TEXTBOX;
-//    Text txt;
-//    std::vector<Text> pause;
-//    RectangleShape textbox, inputbox, exitbox;
-//    std::vector<std::pair<Text, Text>> scoreUser;
-//    std::vector<RectangleShape> textboxs;
-//public:
-//    Menu(float width, float height);
-//    void draw(RenderWindow& window, int windowState);
-//    void ExitBox(RenderWindow& window);
-//    void MoveUp(int windowState);
-//    void MoveDown(int windowState);
-//    void CreateScoreboard();
-//    std::vector<Text> text[MAX_STATE];
-//    std::vector<RectangleShape> resumebox;
-//    std::set<std::pair<int, std::string>, std::greater<std::pair<int, std::string>>> rank;
-//    Sound sound[6];
-//    int selectedItemIndex = 0;
-//};
-
 enum GameState
 {
     MENU, GAME, PAUSE, END, READY
@@ -369,8 +345,6 @@ int main()
                         break;
                     }
 
-
-                    //window.clear(/*sf::Color(100, 150, 150, 50)*/); 
                     window.clear();
                     window.draw(background);
                     window.draw(score);
@@ -378,8 +352,6 @@ int main()
                     window.display();
                     continue;
                 }
-
-                //if (enemy.getPosition().y == player.getPosition().y) life--;
 
                 player.Update(deltaTime);
                 enemy.Update(deltaTime);
