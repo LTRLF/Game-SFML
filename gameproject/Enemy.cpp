@@ -16,16 +16,6 @@ void Enemy::Update(float deltaTime)
 {
 	sf::Vector2f movement(0.0f, 0.0f);
 	movement.y += deltaTime * speed;
-	//if (movement.x == 0.0f)
-	//{
-	//	row = 0;
-
-	//	if (movement.x > 0.0f)
-	//		faceRight = true;
-	//	else
-	//		faceRight = false;
-	//}
-
 	animation.Update(row, deltaTime, faceRight);
 	body.setTextureRect(animation.uvRect);
 	body.move(movement);
@@ -35,4 +25,9 @@ void Enemy::Update(float deltaTime)
 void Enemy::Draw(sf::RenderWindow& window)
 {
 	window.draw(body);
+}
+
+sf::RectangleShape& Enemy::getBody()
+{
+	return body;
 }

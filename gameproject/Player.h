@@ -9,6 +9,7 @@ public:
 	//~Player();
 	void Update(float deltaTime);
 	void Draw(sf::RenderWindow& window);
+	sf::RectangleShape& getBody();
 
 private:
 	sf::RectangleShape body;
