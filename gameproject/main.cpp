@@ -9,6 +9,7 @@
 #include "Logic.h"
 #include "main.h"
 #include <sstream>
+#include <fstream>
 using namespace sf;
 using namespace std;
 
@@ -32,38 +33,59 @@ std::string KeyToString(sf::Keyboard::Key key) {
     }
 }
 
+void saveScore(std::string name, int score)
+{
+    std::ofstream file;
+    file.open("Assets/Assets/scoreboard.txt", std::ios::app);
+    file << name << " " << score << std::endl;
+    file.close();
+}
+
 int main()
 {
     srand(static_cast<unsigned>(time(0)));
 
+    //render window
     sf::RenderWindow window(sf::VideoMode(550, 800), "Press[!] No Wait", sf::Style::Close);
     NewMenu   menu(window.getSize().x, window.getSize().y);
     PauseMenu pause(window.getSize().x / 4.f, window.getSize().y / 2.f);
 
+    //game background
     sf::Texture backgroundTexture;
     backgroundTexture.loadFromFile("Assets/Assets/background.png");
     sf::RectangleShape background(sf::Vector2f(550, 800));
     background.setTexture(&backgroundTexture);
 
+    //READY background
     sf::Texture skyTexture;
     skyTexture.loadFromFile("Assets/Assets/sky.jpg");
     sf::RectangleShape sky(sf::Vector2f(550, 800));
     sky.setTexture(&skyTexture);
 
-    sf::Texture playerTexture;
-    playerTexture.loadFromFile("Knight.png");
+    //MENU background
+    sf::Texture menuBGTexture;
+    menuBGTexture.loadFromFile("Assets/Assets/MenuBg.png");
+    sf::RectangleShape menuBG(sf::Vector2f(550, 800));
+    menuBG.setTexture(&menuBGTexture);
 
+    //player sprite 
+    sf::Texture playerTexture;
+    playerTexture.loadFromFile("Assets/Assets/Knight.png");
+
+    //enemy sprite
     sf::Texture enemyTexture;
     enemyTexture.loadFromFile("Assets/Assets/Blue wizard/BlueWizard.png");
 
     int score = 0;
+    std::string stringUsername;
 
-
+    //import font
     sf::Font font;
     if (!font.loadFromFile("Next Bro.ttf"))
     {
         //handle error
     }
+
     //arrow graphics
     sf::Texture upTexture;
     upTexture.loadFromFile("Assets/Assets/Buttons/Pixel Up Buttons.png");
@@ -74,13 +96,13 @@ int main()
     sf::Texture rightTexture;
     rightTexture.loadFromFile("Assets/Assets/Buttons/Pixel Right Buttons.png");
 
+    //square to put the arrow graphics in
     sf::RectangleShape shape;
     shape.setSize(Vector2f(64, 64));
     shape.setTexture(&upTexture);
     shape.setPosition(260.0f, 330.0f);
 
     Player player(&playerTexture, sf::Vector2u(4, 2), 0.3f, 100.0f);
-    std::string stringUsername;
 
     std::vector<Enemy> enemies;
 
@@ -125,10 +147,10 @@ int main()
                         case 0:
                             std::cout << "Fight button" << std::endl;
                             score = 0;
-                            state = GAME;
+                            state = READY;
                             break;
                         case 1:
-                            std::cout << "Option button" << std::endl;
+                            std::cout << "ScoreBoard button" << std::endl;
                             break;
                         case 2:
                             window.close();
@@ -151,32 +173,50 @@ int main()
             }*/
 
             window.clear(sf::Color(67, 165, 220));
+            window.draw(menuBG);
             menu.draw(window);
             window.display();
         }
 
         if (state == READY) {
-            while (window.pollEvent(evnt))
-            {
-                switch (evnt.type)
-                {
-                case sf::Event::Closed:
-                    window.close();
-                    break;
+            
+            sf::Text text;
+            text.setFont(font);
+            text.setCharacterSize(50);
+            text.setFillColor(sf::Color(35, 35, 35));
+            text.setPosition(280, 340);
 
-                    if (evnt.type == sf::Event::TextEntered) {
-                        if (evnt.text.unicode == sf::Keyboard::BackSpace) {
-                            stringUsername = stringUsername.substr(0, stringUsername.size() - 1);
+            while (state == READY)
+            {
+                while (window.pollEvent(evnt))
+                {
+                    switch (evnt.type)
+                    {
+                    case sf::Event::Closed:
+                        window.close();
+                        break;
+
+                    case sf::Event::TextEntered:
+                        if (evnt.key.code == sf::Keyboard::BackSpace) {
+                            stringUsername.pop_back();
+                            text.setString(stringUsername);
+                            text.setOrigin(text.getGlobalBounds().width / 2, text.getGlobalBounds().height / 2);
+                            break;
                         }
-                        else if (evnt.text.unicode != sf::Keyboard::Return && evnt.text.unicode != sf::Keyboard::Escape && stringUsername.size() < 12) {
+                        else if (evnt.text.unicode != sf::Keyboard::Return && evnt.text.unicode != sf::Keyboard::BackSpace && evnt.text.unicode != sf::Keyboard::Escape && stringUsername.size() < 12) {
                             stringUsername += evnt.text.unicode;
+                            text.setString(stringUsername);
+                            text.setOrigin(text.getGlobalBounds().width / 2, text.getGlobalBounds().height / 2);
+                            cout << stringUsername << endl;
                         }
-                    }
+                        //cout << "Print" << endl;
+                    } 
                 }
+                window.clear();
+                window.draw(sky);
+                window.draw(text);
+                window.display();
             }
-            window.clear(sf::Color(67, 165, 220));
-            window.draw(sky);
-            window.display();
         }
 
         if (state == GAME || state == PAUSE)
@@ -187,6 +227,7 @@ int main()
             keyText.setFillColor(sf::Color::White);
             keyText.setPosition(190.0f, 330.0f);
 
+            //random key
             sf::Keyboard::Key randomKey = static_cast<sf::Keyboard::Key>(sf::Keyboard::Left + rand() % 4);
             std::string keyString = KeyToString(randomKey);
             keyText.setString("Press: ");
@@ -220,6 +261,7 @@ int main()
                         window.close();
                     }
 
+                    //correct key pressed
                     if (evnt.type == sf::Event::KeyPressed && evnt.key.code >= 71 && evnt.key.code <= 74 && state == GAME) {
                         if (evnt.key.code == randomKey) {
                             curscore += 5;
