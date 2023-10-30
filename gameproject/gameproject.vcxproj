@@ -164,8 +164,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="EndGame.cpp" />
     <ClCompile Include="Enemy.cpp" />
-    <ClCompile Include="Logic.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NewMenu.cpp" />
     <ClCompile Include="PauseMenu.cpp" />
@@ -174,8 +174,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation.h" />
+    <ClInclude Include="EndGame.h" />
     <ClInclude Include="Enemy.h" />
-    <ClInclude Include="Logic.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="NewMenu.h" />
     <ClInclude Include="PauseMenu.h" />

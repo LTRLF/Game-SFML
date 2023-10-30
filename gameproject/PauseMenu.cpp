@@ -12,16 +12,16 @@ PauseMenu::PauseMenu(float width, float height)
 		//handle error
 	}
 
-	sf::Text text;
 	text.setFont(font);
 	text.setString("Paused");
+	text.setCharacterSize(50);
 	text.setFillColor(sf::Color(255, 255, 255));
-	text.setPosition(110.0f, 100.0f);
+	text.setPosition(210.0f, 255.0f);
 
 	pause[0].setFont(font);
 	pause[0].setFillColor(sf::Color::Red);
 	pause[0].setString("Resume");
-	pause[0].setPosition(sf::Vector2f(width +26, (height+15 / (MAX_NUMBER_OF_ITEMS + 1) * 1)-55));
+	pause[0].setPosition(sf::Vector2f(width +26, (height+15 / (MAX_NUMBER_OF_ITEMS + 1) * 1) - 43));
 
 	pause[1].setFont(font);
 	pause[1].setFillColor(sf::Color::White);

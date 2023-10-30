@@ -36,7 +36,7 @@
     <ClCompile Include="PauseMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Logic.cpp">
+    <ClCompile Include="EndGame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -59,7 +59,7 @@
     <ClInclude Include="main.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Logic.h">
+    <ClInclude Include="EndGame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
