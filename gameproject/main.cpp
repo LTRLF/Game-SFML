@@ -477,6 +477,7 @@ int main()
                         {
                         case 0:
                             std::cout << "Play Again" << std::endl;
+                            enemy.speed = 40;
                             state = GAME;
                             break;
                         case 1:
