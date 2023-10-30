@@ -6,15 +6,16 @@
 #include <random>
 #include <vector>
 #include "PauseMenu.h"
-#include "Logic.h"
 #include "main.h"
+#include "EndGame.h"
 #include <sstream>
+#include <fstream>
 using namespace sf;
 using namespace std;
 
 enum GameState
 {
-    MENU, GAME, PAUSE, END, READY
+    MENU, GAME, PAUSE, END, READY, SCOREBOARD
 };
 
 std::string KeyToString(sf::Keyboard::Key key) {
@@ -32,38 +33,84 @@ std::string KeyToString(sf::Keyboard::Key key) {
     }
 }
 
+void saveScore(std::string name, int score)
+{
+    std::ofstream file;
+    file.open("Assets/Assets/scoreboard.txt", std::ios::app);
+    file << name << " " << score << std::endl;
+    file.close();
+}
+
+void printScore(sf::Text* ScoreTop)
+{
+    std::ifstream file;
+    file.open("Assets/Assets/scoreboard.txt");
+    std::string line;
+    std::vector<std::pair<std::string, int>> scores;
+    while (std::getline(file, line)) {
+        std::istringstream iss(line);
+        std::string name;
+        int score;
+        iss >> name >> score;
+        scores.push_back(std::make_pair(name, score));
+    }
+    file.close();
+    std::sort(scores.begin(), scores.end(), [](const std::pair<std::string, int>& a, const std::pair<std::string, int>& b) {
+        return a.second > b.second;
+        });
+
+    for (int i = 0; i < 5 && i < scores.size(); i++) {
+        ScoreTop[i].setString(std::to_string(i + 1) + " : " + std::to_string(scores[i].second) + " " + scores[i].first);
+    }
+
+}
+
 int main()
 {
     srand(static_cast<unsigned>(time(0)));
 
-    sf::RenderWindow window(sf::VideoMode(550, 800), "Press[!] No Wait", sf::Style::Close);
+    //render window
+    sf::RenderWindow window(sf::VideoMode(550, 800), "Press Next[!] Wait", sf::Style::Close);
     NewMenu   menu(window.getSize().x, window.getSize().y);
     PauseMenu pause(window.getSize().x / 4.f, window.getSize().y / 2.f);
+    EndGame   end(window.getSize().x / 4.f, window.getSize().y / 2.f);
 
+    //game background
     sf::Texture backgroundTexture;
     backgroundTexture.loadFromFile("Assets/Assets/background.png");
     sf::RectangleShape background(sf::Vector2f(550, 800));
     background.setTexture(&backgroundTexture);
 
+    //READY background
     sf::Texture skyTexture;
     skyTexture.loadFromFile("Assets/Assets/sky.jpg");
     sf::RectangleShape sky(sf::Vector2f(550, 800));
     sky.setTexture(&skyTexture);
 
-    sf::Texture playerTexture;
-    playerTexture.loadFromFile("Knight.png");
+    //MENU background
+    sf::Texture menuBGTexture;
+    menuBGTexture.loadFromFile("Assets/Assets/MenuBg.png");
+    sf::RectangleShape menuBG(sf::Vector2f(550, 800));
+    menuBG.setTexture(&menuBGTexture);
 
+    //player sprite 
+    sf::Texture playerTexture;
+    playerTexture.loadFromFile("Assets/Assets/Knight.png");
+
+    //enemy sprite
     sf::Texture enemyTexture;
     enemyTexture.loadFromFile("Assets/Assets/Blue wizard/BlueWizard.png");
 
-    int score = 0;
+    int curscore;
+    std::string stringUsername;
 
-
+    //import font
     sf::Font font;
     if (!font.loadFromFile("Next Bro.ttf"))
     {
         //handle error
     }
+
     //arrow graphics
     sf::Texture upTexture;
     upTexture.loadFromFile("Assets/Assets/Buttons/Pixel Up Buttons.png");
@@ -74,13 +121,13 @@ int main()
     sf::Texture rightTexture;
     rightTexture.loadFromFile("Assets/Assets/Buttons/Pixel Right Buttons.png");
 
+    //square to put the arrow graphics in
     sf::RectangleShape shape;
     shape.setSize(Vector2f(64, 64));
     shape.setTexture(&upTexture);
     shape.setPosition(260.0f, 330.0f);
 
     Player player(&playerTexture, sf::Vector2u(4, 2), 0.3f, 100.0f);
-    std::string stringUsername;
 
     std::vector<Enemy> enemies;
 
@@ -90,9 +137,9 @@ int main()
     std::random_device rd;
     std::mt19937 gen(rd());
 
-    //temporary
+    //enemy
     float spawnEnemyX = (rand() % 460);
-    float speed = 40;
+    float speed = 400;
     sf::Vector2f position(spawnEnemyX, -100.0f);
     Enemy enemy(&enemyTexture, sf::Vector2u(2, 1), 0.5f, speed, position);
 
@@ -124,11 +171,12 @@ int main()
                         {
                         case 0:
                             std::cout << "Fight button" << std::endl;
-                            score = 0;
-                            state = GAME;
+                            curscore = 0;
+                            state = READY;
                             break;
                         case 1:
-                            std::cout << "Option button" << std::endl;
+                            std::cout << "ScoreBoard button" << std::endl;
+                            state = SCOREBOARD;
                             break;
                         case 2:
                             window.close();
@@ -151,32 +199,67 @@ int main()
             }*/
 
             window.clear(sf::Color(67, 165, 220));
+            window.draw(menuBG);
             menu.draw(window);
             window.display();
         }
 
         if (state == READY) {
-            while (window.pollEvent(evnt))
-            {
-                switch (evnt.type)
-                {
-                case sf::Event::Closed:
-                    window.close();
-                    break;
+            sf::Text name;
+            name.setFont(font);
+            name.setCharacterSize(50);
+            name.setFillColor(sf::Color(35, 35, 35));
+            name.setPosition(80, 210);
+            name.setString("Perhaps thee could \ntell I thy name?");
 
-                    if (evnt.type == sf::Event::TextEntered) {
-                        if (evnt.text.unicode == sf::Keyboard::BackSpace) {
-                            stringUsername = stringUsername.substr(0, stringUsername.size() - 1);
-                        }
-                        else if (evnt.text.unicode != sf::Keyboard::Return && evnt.text.unicode != sf::Keyboard::Escape && stringUsername.size() < 12) {
+            sf::Text user;
+            user.setFont(font);
+            user.setCharacterSize(40);
+            user.setFillColor(sf::Color(35, 35, 35));
+            user.setPosition(280, 380);
+
+            stringUsername.clear();
+
+            while (state == READY)
+            {
+                while (window.pollEvent(evnt))
+                {
+                    switch (evnt.type)
+                    {
+                    case sf::Event::Closed:
+                        window.close();
+                        break;
+
+                    case sf::Event::TextEntered:
+                        if (evnt.text.unicode < 128 && evnt.text.unicode > 32)
+                        {
                             stringUsername += evnt.text.unicode;
+                            user.setString(stringUsername);
+                            user.setOrigin(user.getGlobalBounds().width / 2, user.getGlobalBounds().height / 2);
                         }
+                        else if (evnt.text.unicode == 8 && !stringUsername.empty())
+                        {
+                            stringUsername.pop_back();
+                            user.setString(stringUsername);
+                            user.setOrigin(user.getGlobalBounds().width / 2, user.getGlobalBounds().height / 2);
+                        }
+                        else if (evnt.text.unicode == 13 && !stringUsername.empty())
+                        {
+                            state = GAME;
+                        }
+                        else if (evnt.text.unicode == 27)
+                        {
+                            state = MENU;
+                        }
+                        break;
                     }
                 }
+                window.clear();
+                window.draw(sky);
+                window.draw(name);
+                window.draw(user);
+                window.display();
             }
-            window.clear(sf::Color(67, 165, 220));
-            window.draw(sky);
-            window.display();
         }
 
         if (state == GAME || state == PAUSE)
@@ -187,6 +270,7 @@ int main()
             keyText.setFillColor(sf::Color::White);
             keyText.setPosition(190.0f, 330.0f);
 
+            //random key
             sf::Keyboard::Key randomKey = static_cast<sf::Keyboard::Key>(sf::Keyboard::Left + rand() % 4);
             std::string keyString = KeyToString(randomKey);
             keyText.setString("Press: ");
@@ -194,11 +278,11 @@ int main()
             //score
             Font font;
             font.loadFromFile("Next Bro.ttf");
-            int curscore = 0;
-            Text score;
-            score.setFont(font);
-            score.setCharacterSize(24);
-            score.setString("Score: " + std::to_string(curscore));
+            curscore = 0;
+            Text txtscore;
+            txtscore.setFont(font);
+            txtscore.setCharacterSize(24);
+            txtscore.setString("Score: " + std::to_string(curscore));
 
             //lives
             int lives = 3;
@@ -211,6 +295,11 @@ int main()
             //enemyhp
             int enemyhp = 3;
 
+            float spawnEnemyX = (rand() % 460);
+            speed = 40;
+            sf::Vector2f position(spawnEnemyX, -100.0f);
+            enemy.getBody().setPosition(position);
+
             while (state == GAME || state == PAUSE)
             {
                 sf::Event evnt;
@@ -220,11 +309,12 @@ int main()
                         window.close();
                     }
 
+                    //correct key pressed
                     if (evnt.type == sf::Event::KeyPressed && evnt.key.code >= 71 && evnt.key.code <= 74 && state == GAME) {
                         if (evnt.key.code == randomKey) {
                             curscore += 5;
                             enemyhp -= 1;
-                            score.setString("Score: " + std::to_string(curscore));
+                            txtscore.setString("Score: " + std::to_string(curscore));
                             std::cout << "Correct Key Pressed!" << std::endl;
                             randomKey = static_cast<sf::Keyboard::Key>(sf::Keyboard::Left + rand() % 4);
                             keyString = KeyToString(randomKey);
@@ -256,20 +346,7 @@ int main()
                         }
                         }
 
-                        /*break;*/
-
-                    /*case sf::Event::Closed:
-                        window.close();
-                        break;*/
                     }
-                    //}
-
-                    /*else
-                    {
-                        state = END;
-                    }*/
-
-
 
                 }
 
@@ -291,7 +368,6 @@ int main()
                     life.setString("Lives: " + std::to_string(lives));
 
                     float spawnEnemyX = (rand() % 460);
-                    float speed = 40;
                     sf::Vector2f position(spawnEnemyX, -100.0f);
                     enemy.getBody().setPosition(position);
                     enemyhp = 3;
@@ -299,20 +375,19 @@ int main()
 
                 if (enemyhp == 0) {
                     float spawnEnemyX = (rand() % 460);
-                    speed = 40;
+                    enemy.speed += 2;
                     sf::Vector2f position(spawnEnemyX, -100.0f);
                     enemy.getBody().setPosition(position);
                     enemyhp = 3;
                 }
 
                 if (lives == 0) {
+                    saveScore(stringUsername, curscore);
                     state = END;
                 }
 
                 if (state == PAUSE)
                 {
-
-
                     switch (evnt.type)
                     {
                     case sf::Event::KeyReleased:
@@ -320,10 +395,12 @@ int main()
                         {
                         case sf::Keyboard::Up:
                             pause.MoveUp();
-                            continue;
+                            evnt.key.code = sf::Keyboard::Unknown;
+                            break;
                         case sf::Keyboard::Down:
                             pause.MoveDown();
-                            continue;
+                            evnt.key.code = sf::Keyboard::Unknown;
+                            break;
 
                         case sf::Keyboard::Return:
                             switch (pause.GetPressedItem())
@@ -347,7 +424,7 @@ int main()
 
                     window.clear();
                     window.draw(background);
-                    window.draw(score);
+                    window.draw(txtscore);
                     pause.draw(window);
                     window.display();
                     continue;
@@ -359,7 +436,7 @@ int main()
                 player.Draw(window);
                 enemy.Draw(window);
                 window.draw(keyText);
-                window.draw(score);
+                window.draw(txtscore);
                 window.draw(life);
                 window.draw(shape);
                 window.display();
@@ -368,7 +445,112 @@ int main()
 
         }
 
-    }
+        if (state == END)
+        {
+            //score display
+            Font font;
+            font.loadFromFile("Next Bro.ttf");
+            Text txtscore;
+            txtscore.setFont(font);
+            txtscore.setCharacterSize(30);
+            txtscore.setPosition(230.0f, 275.0f);
+            txtscore.setString("Score: " + std::to_string(curscore));
 
+            while (window.pollEvent(evnt))
+            {
+                switch (evnt.type)
+                {
+                case sf::Event::KeyReleased:
+                    switch (evnt.key.code)
+                    {
+                    case sf::Keyboard::Up:
+                        end.MoveUp();
+                        evnt.key.code = sf::Keyboard::Unknown;
+                        break;
+                    case sf::Keyboard::Down:
+                        end.MoveDown();
+                        evnt.key.code = sf::Keyboard::Unknown;
+                        break;
+
+                    case sf::Keyboard::Return:
+                        switch (end.GetPressedItem())
+                        {
+                        case 0:
+                            std::cout << "Play Again" << std::endl;
+                            state = GAME;
+                            break;
+                        case 1:
+                            //scoreboard
+                        case 2:
+                            state = MENU;
+                            break;
+                        }
+                    }
+
+                    break;
+
+                case sf::Event::Closed:
+                    window.close();
+                    break;
+                }
+            }
+            window.clear();
+            window.draw(background);
+            end.draw(window);
+            window.draw(txtscore);
+            window.display();
+            continue;
+        }
+
+        if (state == SCOREBOARD)
+        {
+            sf::RectangleShape scorebg;
+            scorebg.setSize(sf::Vector2f(400.0f, 400.0f));
+            scorebg.setFillColor(sf::Color(150, 150, 150, 200));
+            scorebg.setPosition(75.0f, 215.0f);
+
+            Text scoretitle;
+            scoretitle.setFont(font);
+            scoretitle.setCharacterSize(50);
+            scoretitle.setPosition(160.0f, 250.0f);
+            scoretitle.setString("Scoreboard");
+
+            sf::Text ScoreTop[5];
+            printScore(ScoreTop);
+
+            for (int i = 0; i < 5; i++) {
+                ScoreTop[i].setFont(font);
+                ScoreTop[i].setCharacterSize(35);
+                ScoreTop[i].setFillColor(sf::Color::White);
+                ScoreTop[i].setPosition(120, 340 + (i * 50));
+            }
+
+            while (window.pollEvent(evnt))
+            {
+                switch (evnt.type)
+                {
+                case sf::Event::Closed:
+                    window.close();
+                    break;
+
+                case sf::Event::KeyPressed:
+                    if (evnt.key.code == sf::Keyboard::Escape)
+                    {
+                        state = MENU;
+                    }
+                }
+            }
+            window.clear();
+            window.draw(sky);
+            window.draw(scorebg);
+            window.draw(scoretitle);
+
+            for (int i = 0; i < 5; i++) {
+                window.draw(ScoreTop[i]);
+            }
+            window.display();
+        }
+
+    }
     return 0;
 }
