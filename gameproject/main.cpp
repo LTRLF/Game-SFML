@@ -139,7 +139,7 @@ int main()
 
     //enemy
     float spawnEnemyX = (rand() % 460);
-    float speed = 400;
+    float speed = 40;
     sf::Vector2f position(spawnEnemyX, -100.0f);
     Enemy enemy(&enemyTexture, sf::Vector2u(2, 1), 0.5f, speed, position);
 
